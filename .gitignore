@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.env
+venv/
+ENV/
+env/
+.venv/
+.venv
+pip-wheel-metadata/
+*.egg-info/
+*.egg
+
+# dbt
+target/
+dbt_packages/
+logs/
+profiles.yml
+packages.yml.lock
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraform.lock.hcl
+
+# AWS
+*.pem
+*.key
+aws-vault/
+credentials
+config
+
+# VS Code
+.vscode/
