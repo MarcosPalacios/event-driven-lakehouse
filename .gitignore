@@ -40,3 +40,6 @@ config
 
 # VS Code
 .vscode/
+
+# Data files
+*.jsonl
