@@ -52,6 +52,35 @@ Run:
 
 The script logs pagination progress, the total event count, and the output file path.
 
+## Checkpointing
+
+This service uses a simple S3-backed checkpoint to reduce reprocessing of recently seen events between runs. The checkpoint is intentionally lightweight and is not a deduplication store — Bronze remains append-only.
+
+- Storage: S3 bucket `event-driven-lakehouse-bronz`
+- Object key: `checkpoints/repo=apache_spark.json` (per-repo file; template: `checkpoints/repo={owner}_{repo}.json`)
+- Format: JSON with a single field:
+
+	`{"last_run_at": "<UTC ISO timestamp>"}`
+
+Behavior summary:
+
+- On start: the pipeline attempts to load the checkpoint from S3. If missing, `last_run_at` defaults to `1970-01-01T00:00:00Z`.
+- During ingestion: fetched events are filtered in-memory to keep only those with `created_at` newer than `last_run_at` (a 2-minute margin is applied to the cutoff to reduce edge-case reprocessing).
+- After a successful upload of the filtered batch, the checkpoint is overwritten in S3 with the maximum `created_at` from the ingested events using `boto3.put_object`.
+- The pipeline emits `checkpoint_loaded` and `checkpoint_updated` structured log events to indicate checkpoint activity.
+
+## Logging
+
+Logs are emitted as single-line JSON objects to stdout to make them readable and queryable in CloudWatch Logs.
+
+- Each log line includes at minimum: `timestamp` (UTC ISO), `event` (semantic name), `repo`, and additional metadata fields.
+- Example log line:
+
+	`{"timestamp":"2026-05-31T12:34:56+00:00","event":"s3_upload_complete","repo":"apache/spark","bucket":"...","key":"...","records":42}`
+
+- In CloudWatch Logs / Logs Insights you can parse and query these JSON fields directly for structured searches and metrics.
+- The `log_event` helper in the code centralizes the JSON structure and ensures consistent fields across events.
+
 ## Future improvements
 
 - Upload JSONL batches directly to S3 Bronze
