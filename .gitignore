@@ -37,9 +37,16 @@ override.tf.json
 aws-vault/
 credentials
 config
+*.zip
+lambda.zip
+build/
+tmp-build/
 
 # VS Code
 .vscode/
 
 # Data files
 *.jsonl
+
+# Local CLI artifacts
+output.json

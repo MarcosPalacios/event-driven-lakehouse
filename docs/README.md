@@ -28,7 +28,7 @@ This repository is designed for a hands-on project focused on:
 ```
 event-driven-lakehouse/
 ├── ingestion/   # Python scripts for incremental ingestion to S3 Bronze
-├── lambda/      # AWS Lambda function for Bronze -> Silver transformation
+│   └── lambda/  # AWS Lambda function for Bronze -> Silver transformation
 ├── dbt/         # dbt models and tests for Athena and Gold
 ├── airflow/     # orchestration DAGs
 ├── terraform/   # declarative AWS infrastructure

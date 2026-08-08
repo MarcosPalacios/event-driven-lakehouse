@@ -2,15 +2,16 @@
 
 ## Overview
 
-This module extracts GitHub events and writes raw batches to the Bronze layer.
-It is the first stage of the pipeline and produces local JSONL files that can later be moved to S3.
+This module extracts GitHub events and writes raw batches directly to the Bronze layer in S3.
+It is the first stage of the pipeline and writes raw event batches in JSONL format to S3 Bronze.
 
 ## What it does
 
 - Fetches repository events from GitHub using the `/repos/{owner}/{repo}/events` endpoint
 - Handles pagination for up to 3 pages of 100 events
-- Saves each batch as a JSONL file in `outputs/bronze/`
+- Uploads each batch as a JSONL file into `event-driven-lakehouse-bronze`
 - Preserves the original event payload without transformation
+- Exposes `run_ingestion(owner, repo, token, bucket, checkpoint_bucket)` for reusable programmatic invocation
 
 ## What it does not do
 
@@ -22,8 +23,9 @@ It is the first stage of the pipeline and produces local JSONL files that can la
 ## Output
 
 - Format: JSON Lines (`.jsonl`)
-- Local folder: `outputs/bronze/`
-- File naming: `github_events_YYYYMMDD_HHMMSS.jsonl`
+- S3 bucket: `event-driven-lakehouse-bronze`
+- S3 key prefix: `bronze/github_events/repo={owner}-{repo}/year=YYYY/month=MM/day=DD/`
+- File naming: `events_YYYYMMDD_HHMMSS.jsonl`
 
 Example line:
 
@@ -52,11 +54,29 @@ Run:
 
 The script logs pagination progress, the total event count, and the output file path.
 
+## Programmatic usage
+
+Import `run_ingestion` from `ingestion/main.py` and call it directly from other Python code, including serverless handlers:
+
+```python
+from ingestion.main import run_ingestion
+
+result = run_ingestion(
+    owner='apache',
+    repo='spark',
+    token='YOUR_GITHUB_TOKEN',
+    bucket='event-driven-lakehouse-bronze',
+    checkpoint_bucket='event-driven-lakehouse-bronze',
+)
+```
+
+`run_ingestion` returns a dictionary with ingestion status and metadata.
+
 ## Checkpointing
 
 This service uses a simple S3-backed checkpoint to reduce reprocessing of recently seen events between runs. The checkpoint is intentionally lightweight and is not a deduplication store — Bronze remains append-only.
 
-- Storage: S3 bucket `event-driven-lakehouse-bronz`
+- Storage: S3 bucket `event-driven-lakehouse-bronze`
 - Object key: `checkpoints/repo=apache_spark.json` (per-repo file; template: `checkpoints/repo={owner}_{repo}.json`)
 - Format: JSON with a single field:
 
@@ -83,11 +103,9 @@ Logs are emitted as single-line JSON objects to stdout to make them readable and
 
 ## Future improvements
 
-- Upload JSONL batches directly to S3 Bronze
-- Add retry and backoff for API calls
-- Add incremental checkpointing
-- Add structured logging
-- Support ingesting multiple repositories
+- Add retry and backoff for GitHub and S3 API calls
+- Add incremental checkpointing and multi-repo support
+- Add structured validation/contract checks for events
 - Package as Docker / AWS Lambda compatible code
 
 ## Integration

@@ -21,7 +21,7 @@ Crear una solución con:
 event-driven-lakehouse/
 │
 ├── ingestion/
-├── lambda/
+│   └── lambda/
 ├── dbt/
 ├── airflow/
 ├── terraform/
@@ -34,7 +34,7 @@ event-driven-lakehouse/
 
 1. Definir el flujo de ingestión incremental y los eventos de GitHub.
 2. Prototipar el script de `ingestion/` para descargar y guardar JSONL en S3 Bronze.
-3. Desarrollar la Lambda en `lambda/` con separación entre handler y lógica de negocio.
+3. Desarrollar la Lambda en `ingestion/lambda/` con separación entre handler y lógica de negocio.
 4. Crear modelos dbt en `dbt/` con `incremental`, `tests`, `dedup` y métricas.
 5. Añadir DAGs de Airflow en `airflow/` para orquestar ingestion, dbt runs y tests.
 6. Migrar la infraestructura AWS a `terraform/` paso a paso.
