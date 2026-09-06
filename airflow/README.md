@@ -1,8 +1,8 @@
 # Airflow
 
-Contendrá DAGs para orquestar:
+This folder will contain DAGs to orchestrate:
 
-- ingesta incremental
-- ejecuciones dbt
-- tests y retries
+- incremental ingestion
+- dbt runs
+- tests and retries
 - backfills

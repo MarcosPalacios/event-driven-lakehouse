@@ -1,6 +1,6 @@
 # Terraform
 
-Contendrá la infraestructura declarativa para:
+This folder will contain the declarative infrastructure for:
 
 - S3
 - IAM
@@ -8,4 +8,4 @@ Contendrá la infraestructura declarativa para:
 - Policies
 - CloudWatch
 
-Primero implementar manualmente en AWS Console, luego migrar a Terraform.
+First implement it manually in the AWS Console, then migrate it to Terraform.

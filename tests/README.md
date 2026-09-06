@@ -1,8 +1,8 @@
 # Tests
 
-Contendrá pruebas para:
+This folder will contain tests for:
 
-- lógica de ingestión incremental
-- transformación en Lambda
-- modelos dbt
-- integración local
+- incremental ingestion logic
+- Lambda transformation
+- dbt models
+- local integration

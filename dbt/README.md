@@ -1,8 +1,8 @@
 # dbt
 
-Contendrá los modelos SQL para Athena y la materialización de Gold en S3.
+This folder will contain the SQL models for Athena and the Gold materialization in S3.
 
 - Incremental models
 - Tests
-- Dedupe
-- Métricas de negocio
+- Deduplication
+- Business metrics
