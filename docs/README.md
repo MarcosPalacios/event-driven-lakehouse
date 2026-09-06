@@ -41,6 +41,7 @@ event-driven-lakehouse/
 
 - Repository created locally and on GitHub
 - Main branch renamed to `main`
+- The ingestion Lambda is triggered daily by Amazon EventBridge Scheduler at 09:00 in `Europe/Madrid`.
 
 ## Project Scope
 
@@ -58,6 +59,15 @@ event-driven-lakehouse/
 - Lambda writes Parquet to Silver
 - Business logic separated from the AWS handler
 - Logic designed to be testable locally
+
+### Scheduled Ingestion
+
+- Scheduler: Amazon EventBridge Scheduler
+- Schedule name: `daily-github-events-ingestion`
+- Expression: `cron(0 9 * * ? *)`
+- Time zone: `Europe/Madrid`
+- Target Lambda: `github-ingestion-s3-bronze`
+- Region: `eu-north-1`
 
 ### Query Layer and dbt
 

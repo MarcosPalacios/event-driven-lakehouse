@@ -45,6 +45,8 @@ For local testing, call `run_ingestion` from `ingestion/main.py` directly with t
 - Reads env vars for GitHub token, Bronze bucket, and checkpoint bucket.
 - Keeps the Lambda handler minimal and reusable.
 - **Packaging and deployment from CLI via AWS CLI** (see [docs/lambda-deploy.md](../../docs/lambda-deploy.md) for the full workflow)
+- **Daily invocation through Amazon EventBridge Scheduler** at 09:00 in `Europe/Madrid`.
+- Scheduler name: `daily-github-events-ingestion`
 
 ### Pending
 

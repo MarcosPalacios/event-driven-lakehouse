@@ -15,6 +15,16 @@ Crear una solución con:
 - Infraestructura declarativa con Terraform
 - Observabilidad con CloudWatch
 
+## Configuración AWS
+
+La región AWS del proyecto es `eu-north-1` (Europe, Stockholm).
+
+Configura esta región como predeterminada para la AWS CLI antes de ejecutar comandos del proyecto:
+
+```powershell
+aws configure set region eu-north-1
+```
+
 ## Estructura del repo
 
 ```
