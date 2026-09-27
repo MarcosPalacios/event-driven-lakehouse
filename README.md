@@ -36,8 +36,6 @@ event-driven-lakehouse/
 
 ## Next Steps
 
-## Next Steps
-
 - [x] 1. **Ingestion Design:** Define the incremental ingestion flow and GitHub events structure.
 - [x] 2. **Script Development:** Prototype the script in `ingestion/` to download and save JSONL to S3 Bronze.
 - [x] 3. **Serverless Deployment:** Develop and deploy the Lambda function with EventBridge for automated ingestion.
