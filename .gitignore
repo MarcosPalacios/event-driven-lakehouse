@@ -25,11 +25,14 @@ packages.yml.lock
 *.tfstate.*
 .terraform/
 crash.log
+crash.*.log
+*.tfplan
+tfplan
+tf-debug.log
 override.tf
 override.tf.json
 *_override.tf
 *_override.tf.json
-.terraform.lock.hcl
 
 # AWS
 *.pem

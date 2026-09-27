@@ -15,7 +15,7 @@ It is the security contract before encoding identities in Terraform.
 
 | Actor | IAM identity | What it can do | On which resource | Status |
 |--------|--------------|----------------|-------------------|--------|
-| **You** | `lakehouse-admin` (IAM User) | Manage project infrastructure | Project resources in `eu-north-1` (+ IAM, which is global) | Pending |
+| **You** | `lakehouse-admin` (IAM User) | Manage project infrastructure | Project resources in `eu-north-1` (+ IAM, which is global) | Active |
 | **Lambda `github-ingestion-s3-bronze`** | `lambda-github-ingestion-role` (IAM Role) | Write logs | `arn:aws:logs:eu-north-1:551322108190:log-group:/aws/lambda/github-ingestion-s3-bronze:*` | Active |
 | ↑ | ↑ | Read and write S3 objects | `arn:aws:s3:::event-driven-lakehouse-bronze/*` | Active |
 | ↑ | ↑ | Read the secret | `arn:aws:secretsmanager:eu-north-1:551322108190:secret:github-events-ingestion/token-*` | Pending |
