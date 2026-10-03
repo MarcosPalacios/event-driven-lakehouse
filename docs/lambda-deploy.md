@@ -1,16 +1,19 @@
-# Lambda deployment from CLI
+# Lambda deployment
 
-This document captures the recommended workflow to package the Lambda and deploy it from the terminal without leaving build artifacts in the project root.
+This document captures the workflow to package the Lambda and deploy it without
+leaving build artifacts in git.
 
 ## Goal
 
-Create a temporary zip containing the Lambda code and its dependencies, upload it to AWS with the AWS CLI, and keep the repository clean.
+Create a temporary zip containing the Lambda code and its dependencies, then
+upload it to AWS. Prefer Terraform for deploy; AWS CLI remains as an alternative.
 
 ## Recommended structure
 
 - Source code: `ingestion/`
 - Temporary build folder: `tmp-build/`
 - Final artifact: `tmp-build/lambda.zip`
+- Build script: `scripts/build-lambda.ps1` (same steps as below)
 - Clean repo: no `build/` folder and no zip in the root
 
 ## PowerShell commands
@@ -34,13 +37,30 @@ python -m pip install -r .\ingestion\lambda\requirements.txt -t .\tmp-build
 Compress-Archive -Path .\tmp-build\* -DestinationPath .\tmp-build\lambda.zip -Force
 ```
 
-## Deploy with AWS CLI
-
-Make sure the AWS CLI is installed and configured with valid credentials.
+Or:
 
 ```powershell
-aws lambda update-function-code \
-  --function-name <name-of-your-lambda> \
+.\scripts\build-lambda.ps1
+```
+
+## Deploy with Terraform (recommended)
+
+`terraform/lambda.tf` points at `tmp-build/lambda.zip`. After building the zip:
+
+```powershell
+cd terraform
+terraform plan
+terraform apply
+```
+
+Terraform updates the function when `source_code_hash` changes. Environment
+variables (including `GITHUB_TOKEN`) are ignored by Terraform until Secrets Manager.
+
+## Deploy with AWS CLI (alternative)
+
+```powershell
+aws lambda update-function-code `
+  --function-name github-ingestion-s3-bronze `
   --zip-file fileb://.\tmp-build\lambda.zip
 ```
 
@@ -49,31 +69,24 @@ aws lambda update-function-code \
 If the Lambda needs environment variables, update them with:
 
 ```powershell
-aws lambda update-function-configuration \
-  --function-name <name-of-your-lambda> \
+aws lambda update-function-configuration `
+  --function-name github-ingestion-s3-bronze `
   --environment "Variables={GITHUB_TOKEN=<token>,BRONZE_BUCKET=event-driven-lakehouse-bronze,GITHUB_OWNER=apache,GITHUB_REPO=spark}"
 ```
 
 ## Quick validation
 
-Invoke the function from AWS:
-
 ```powershell
-aws lambda invoke \
-  --function-name <name-of-your-lambda> \
-  --payload '{"source":"manual"}' \
+aws lambda invoke `
+  --function-name github-ingestion-s3-bronze `
+  --cli-binary-format raw-in-base64-out `
+  --payload '{"source":"manual"}' `
   output.json
-```
 
-Then read the result:
-
-```powershell
 Get-Content .\output.json
 ```
 
 ## Optional cleanup
-
-When you want the repo clean again:
 
 ```powershell
 Remove-Item -Recurse -Force .\tmp-build -ErrorAction SilentlyContinue

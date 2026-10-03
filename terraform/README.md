@@ -2,24 +2,29 @@
 
 Declarative infrastructure for the event-driven lakehouse (region `eu-north-1`).
 
-## Current status (2026-09-27)
+## Current status (2026-10-03)
 
-In AWS / Terraform today:
+Managed in Terraform:
 
-- Scaffold: `versions.tf`, `providers.tf` (profile `lakehouse-admin`), `main.tf`
-- IAM user `lakehouse-admin` with managed policy `AdministratorAccess` (managed in TF)
-- Local auth: AWS CLI profile `lakehouse-admin` (access keys in `~/.aws/credentials`)
-- Provider uses `profile = "lakehouse-admin"` — no `export-credentials` needed for Terraform
-
-Still **manual in AWS** (not in TF yet): S3 bronze, Lambda `github-ingestion-s3-bronze`, EventBridge Scheduler, Lambda execution role, Scheduler role.
+- Layout: `versions.tf`, `providers.tf`, `iam.tf`, `s3.tf`, `lambda.tf`, `scheduler.tf`, `outputs.tf`
+- IAM user `lakehouse-admin` (`AdministratorAccess`)
+- S3 `event-driven-lakehouse-bronze` (+ encryption, public access block) — imported
+- Lambda `github-ingestion-s3-bronze` + role `lambda-github-ingestion-role` — imported; function code deployed from `tmp-build/lambda.zip` (see [docs/lambda-deploy.md](../docs/lambda-deploy.md)); env vars (including `GITHUB_TOKEN`) still ignored by Terraform until Secrets Manager
+- Scheduler `daily-github-events-ingestion` + role `scheduler-github-ingestion-role` — managed in Terraform (schedule recreated with a clean role name)
+- Auth: AWS CLI profile `lakehouse-admin` in `providers.tf`
 
 ## How to run
 
+Package the Lambda first (from the repo root), then plan/apply:
+
 ```powershell
+.\scripts\build-lambda.ps1
 cd terraform
 terraform plan
 terraform apply
 ```
+
+`terraform plan` / `apply` require `tmp-build/lambda.zip` to exist when managing the function code.
 
 ## Environment note (Windows + Avast)
 
@@ -31,10 +36,18 @@ scanning only while running Terraform, then re-enable it.
 ## Pending (next sessions)
 
 1. Replace `AdministratorAccess` with a least-privilege project policy
-2. Decide import vs recreate, then migrate S3 / Lambda / Scheduler (and related IAM roles) into Terraform
-3. Lambda: Secrets Manager permission for the GitHub token (per IAM matrix)
-4. Optional later: remote state, MFA on `lakehouse-admin`, SSO/Identity Center
+2. Secrets Manager for the GitHub token + Lambda role permission (per IAM matrix); stop storing the token in Lambda environment variables
+3. Optional later: remote state, MFA on `lakehouse-admin`, SSO/Identity Center
 
-## Layout note
+## Layout
 
-Keep resources in `main.tf` for now; split by domain (`iam.tf`, `s3.tf`, …) when the config grows.
+Resources are split by domain:
+
+| File | Contents |
+|------|----------|
+| `iam.tf` | `lakehouse-admin`, Lambda role, Scheduler role |
+| `s3.tf` | Bronze bucket + encryption + public access block |
+| `lambda.tf` | Ingestion function |
+| `scheduler.tf` | Daily EventBridge Scheduler schedule |
+| `outputs.tf` | Useful ARNs / names |
+| `versions.tf` / `providers.tf` | Terraform + AWS provider |
